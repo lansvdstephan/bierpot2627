@@ -271,16 +271,18 @@ render();show('team');
 <script type="module">
 // 1) Plak hier de config uit Firebase (Projectinstellingen > Je apps > Web-app)
 const firebaseConfig = {
-  apiKey: "PLAK_HIER_JE_API_KEY",
-  authDomain: "JOUW-PROJECT.firebaseapp.com",
-  projectId: "JOUW-PROJECT",
-  appId: "PLAK_HIER_JE_APP_ID"
+  apiKey: "AIzaSyB5fRF424mabK831Xj020aKqQfauDAQd-A",
+  authDomain: "dashboard-mees.firebaseapp.com",
+  projectId: "dashboard-mees",
+  storageBucket: "dashboard-mees.firebasestorage.app",
+  messagingSenderId: "739422178455",
+  appId: "1:739422178455:web:8bea0e62a6204743842dd2"
 };
 // 2) Wie mag inloggen (zet dezelfde adressen ook in de Firestore-regels)
 const TOEGESTAAN = ["lansvdstephan@gmail.com"];
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let app, auth;
@@ -294,8 +296,17 @@ try {
 const loginBtn = document.getElementById("login");
 let started = false, denied = "";
 
-loginBtn.addEventListener("click", () =>
-  signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => st("Inloggen mislukt: " + (e.code || e.message))));
+loginBtn.addEventListener("click", () => {
+  const provider = new GoogleAuthProvider();
+  signInWithPopup(auth, provider).catch((e) => {
+    if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
+      signInWithRedirect(auth, provider).catch((e2) => st("Inloggen mislukt: " + (e2.code || e2.message)));
+    } else if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+      st("Inloggen mislukt: " + (e.code || e.message));
+    }
+  });
+});
+getRedirectResult(auth).catch((e) => st("Inloggen mislukt: " + (e.code || e.message)));
 
 onAuthStateChanged(auth, (user) => {
   const email = user && user.email ? user.email.toLowerCase() : "";
