@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bierkas</title>
+<style>
+:root{--wine:#6b0f24;--wine-d:#4d0a19;--wine-l:#8a1a33;--ink:#fff;--soft:rgba(255,255,255,.72);--line:rgba(255,255,255,.18);--sheet:#fff;--sheet-ink:#2a1218;--sheet-soft:#7a5a62;--chip:#f4e9ec;--ok:#1f7a4d;--slate:#4b5d73;--bad:#e11d2e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sheet:#2a1118;--sheet-ink:#fbeff2;--sheet-soft:#c9a3ad;--chip:#3d1b25;--slate:#9fb2c8}}
+:root[data-theme="dark"]{--sheet:#2a1118;--sheet-ink:#fbeff2;--sheet-soft:#c9a3ad;--chip:#3d1b25;--slate:#9fb2c8}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--wine);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+main{max-width:560px;margin:0 auto;padding:24px 20px 48px}
+h1{font-size:18px;font-weight:600;margin:0;color:var(--soft)}
+.pot{margin:28px 0 8px;text-align:center}
+.pot small{display:block;font-size:16px;color:var(--soft);margin-bottom:6px}
+.amt{font-size:clamp(56px,18vw,96px);font-weight:800;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums;color:#fff}
+.actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:28px 0}
+button{font:inherit;cursor:pointer}
+.big{background:#fff;color:var(--wine);border:0;border-radius:14px;padding:16px 6px;font-weight:700;font-size:16px}
+.big.alt{background:var(--wine-d);color:#fff;border:1px solid var(--line)}
+button:focus-visible,input:focus-visible{outline:3px solid #ffd36b;outline-offset:2px}
+h2{font-size:16px;margin:0 0 10px;font-weight:600}
+.log{list-style:none;margin:0;padding:0}
+.log li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line)}
+.log .l{min-width:0}.log .l b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.log .l span{font-size:13px;color:var(--soft)}
+.log .r{display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.x{background:none;border:0;color:var(--soft);font-size:13px;text-decoration:underline;padding:4px}
+.empty{color:var(--soft);padding:12px 0;border-top:1px solid var(--line)}
+.sheet{background:var(--sheet);color:var(--sheet-ink);width:100%;max-width:560px;max-height:88vh;overflow:auto;border-radius:22px 22px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom,0px))}
+.sheet.panel{max-width:none;max-height:none;border-radius:18px;padding:20px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.hd h3{margin:0}
+.add{background:var(--wine);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:700;font-size:14px}
+#pf{padding-bottom:6px;margin-bottom:10px;border-bottom:2px solid var(--chip)}
+.pt{width:100%;border-collapse:collapse;font-size:14px}
+.pt th{text-align:left;font-weight:600;color:var(--sheet-soft);padding:8px 6px;border-bottom:2px solid var(--chip)}
+.pt td{padding:12px 6px;border-bottom:1px solid var(--chip);vertical-align:top}
+.pt th:first-child,.pt td:first-child{width:32px;color:var(--sheet-soft)}
+.pt .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700}
+.pt tfoot td{font-weight:700;border-bottom:0;color:var(--sheet-ink)}
+.pt .x{color:var(--sheet-soft);text-decoration:none;font-size:18px;line-height:1;padding:0 2px}
+.none{margin:6px 0 0}
+.sheet .arm{background:var(--bad)!important;color:#fff!important;border-radius:8px;font-size:12px!important;padding:5px 8px!important;text-decoration:none!important}
+.sheet h4{font-size:16px;margin:24px 0 4px}
+.sheet .empty{color:var(--sheet-soft);border-top-color:var(--chip)}
+.big[aria-pressed="true"]{background:#fff;color:var(--wine);border-color:#fff}
+.sheet h3{margin:0 0 4px;font-size:22px}
+.sheet p{margin:0 0 16px;color:var(--sheet-soft);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.chip{background:var(--chip);color:var(--sheet-ink);border:2px solid transparent;border-radius:999px;padding:10px 16px;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--wine);color:#fff;border-color:var(--wine)}
+input[type=text],input[type=number],input[type=date]{width:100%;font:inherit;font-size:18px;padding:13px 14px;border-radius:12px;border:2px solid var(--chip);background:transparent;color:var(--sheet-ink);margin:0 0 14px}
+label{display:block;font-size:14px;font-weight:600;margin:0 0 6px}
+.go{width:100%;background:var(--wine);color:#fff;border:0;border-radius:14px;padding:16px;font-weight:700;font-size:17px}
+.go:disabled{opacity:.4;cursor:not-allowed}
+.close{display:block;margin:12px auto 0;background:none;border:0;color:var(--sheet-soft);padding:8px}
+.sum{font-weight:700;margin:0 0 14px;font-size:16px;color:var(--wine-l)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sum{color:#ff9db4}}
+.row{display:flex;gap:8px}.row input{margin:0}.row .go{width:auto;padding:0 18px}
+.mem{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--chip)}
+.mem span{font-variant-numeric:tabular-nums;font-weight:700}
+.mem .x{color:var(--sheet-soft)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px}
+.pl{position:relative;text-align:center;padding:10px 4px 8px;border-radius:14px;background:var(--chip)}
+.pl .ic{color:var(--slate);line-height:0}
+.pl.late{background:rgba(225,29,46,.13)}.pl.late .ic,.pl.late span{color:var(--bad)}
+.pl b{display:block;font-size:14px;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.pl span{font-weight:700;font-variant-numeric:tabular-nums;font-size:14px}
+.pl .rm{position:absolute;top:0;right:2px;background:none;border:0;color:var(--sheet-soft);font-size:20px;line-height:1;padding:4px 6px}
+.sheet .log li{border-top-color:var(--chip)}
+.sheet .log .l span,.sheet .log .x{color:var(--sheet-soft)}
+.st{font-size:12px;color:var(--soft);text-align:center;margin-top:22px}
+.tot{display:flex;justify-content:space-between;font-weight:700;padding-top:12px;border-top:2px solid var(--chip)}
+body.locked .pot,body.locked .actions,body.locked #view{display:none}
+</style>
+</head>
+<body class="locked">
+<main>
+  <h1>Bierkas · Rijswijk</h1>
+  <section class="pot" aria-live="polite">
+    <small>In de pot</small>
+    <div class="amt" id="pot">€ 0,00</div>
+  </section>
+  <div class="actions">
+    <button class="big alt" data-open="pay" aria-pressed="false">Betalen</button>
+    <button class="big alt" data-open="in" aria-pressed="false">Inleg</button>
+    <button class="big alt" data-open="team" aria-pressed="true">Teamgenoten</button>
+  </div>
+  <div class="sheet panel" id="view"></div>
+  <div class="st" id="st">Even laden...</div>
+  <div style="text-align:center;margin-top:18px"><button class="big" id="login" hidden style="padding:14px 24px">Inloggen met Google</button></div>
+</main>
+
+
+<script>
+var KRAT=42.75, KEY='bierkas-v1';
+var S={players:[],tx:[]};
+try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.players&&p.tx)S=p;}}catch(e){}
+var DBREF=null;
+function st(t){var e=document.getElementById('st');if(e)e.textContent=t;}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  if(DBREF)DBREF.set({players:S.players,tx:S.tx}).catch(function(){st('Online opslaan mislukt, probeer opnieuw');});}
+var fmt=new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR'});
+function eur(n){return fmt.format(n).replace(/\u00a0/g,' ');}
+function num(v){var n=parseFloat(String(v).replace(',','.'));return isFinite(n)&&n>0?Math.round(n*100)/100:0;}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function balance(){return S.tx.reduce(function(a,t){return a+(t.type==='in'?t.amount:-t.amount);},0);}
+function paid(id){return S.tx.reduce(function(a,t){return a+(t.type==='in'&&t.pid===id?t.amount:0);},0);}
+function dt(ts){return new Date(ts).toLocaleDateString('nl-NL',{day:'numeric',month:'short'});}
+
+var sheet=document.getElementById('view'),cur='team';
+function open(html){sheet.innerHTML=html;}
+function close(){show(cur);}
+function show(k){cur=k;
+  document.querySelectorAll('[data-open]').forEach(function(b){b.setAttribute('aria-pressed',String(b.getAttribute('data-open')===k));});
+  if(k==='pay')openPay();else if(k==='in')openIn();else openTeam();}
+function twice(btn,fn){
+  if(btn.getAttribute('data-armed')){fn();return;}
+  var o=btn.textContent;btn.setAttribute('data-armed','1');btn.textContent='Zeker?';btn.classList.add('arm');
+  setTimeout(function(){if(btn.isConnected){btn.removeAttribute('data-armed');btn.textContent=o;btn.classList.remove('arm');}},3500);
+}
+function logHtml(t){
+  var l=S.tx.filter(function(x){return x.type===t;}).sort(function(a,b){return b.ts-a.ts;});
+  if(!l.length)return '<li class="empty">'+(t==='out'?'Nog geen betalingen.':'Nog geen inleg.')+'</li>';
+  return l.map(function(x){
+    return '<li><div class="l"><b>'+esc(x.label)+'</b><span>'+dt(x.ts)+'</span></div><div class="r"><span>'+(t==='in'?'+ ':'− ')+eur(x.amount)+'</span><button class="x" data-del="'+x.id+'">Verwijder</button></div></li>';
+  }).join('');
+}
+function txTable(t){
+  var out=t==='out';
+  var l=S.tx.filter(function(x){return x.type===t;}).sort(function(a,b){return a.ts-b.ts;});
+  if(!l.length)return '<p class="none">'+(out?'Nog geen betalingen.':'Nog geen inleg.')+'</p>';
+  var tot=l.reduce(function(a,x){return a+x.amount;},0);
+  var rows=l.map(function(x,i){return '<tr><td>'+(i+1)+'</td><td>'+dt(x.ts)+'</td><td>'+esc(out?x.label:x.label.replace(/^Inleg /,''))+'</td><td class="n">'+eur(x.amount)+'</td><td><button class="x" data-del="'+x.id+'" aria-label="Verwijder mutatie">×</button></td></tr>';}).reverse().join('');
+  return '<div style="overflow-x:auto"><table class="pt"><thead><tr><th>Nr</th><th>Datum</th><th>'+(out?'Beschrijving':'Teamgenoot')+'</th><th class="n">Bedrag</th><th></th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td colspan="3">'+(out?'Totaal betaald':'Totaal ingelegd')+'</td><td class="n">'+eur(tot)+'</td><td></td></tr></tfoot></table></div>';
+}
+function payTable(){return txTable('out');}
+function inTable(){return txTable('in');}
+function logBlock(t){return '<h4>'+(t==='out'?'Betaalmutaties':'Inlegmutaties')+'</h4><ul class="log" id="log" data-t="'+t+'">'+logHtml(t)+'</ul>';}
+function render(){
+  document.getElementById('pot').textContent=eur(balance());
+  var l=document.getElementById('log');if(l)l.innerHTML=logHtml(l.getAttribute('data-t'));
+  var ls=document.getElementById('ls');if(ls)ls.innerHTML=teamList();
+  var pt=document.getElementById('pt');if(pt)pt.innerHTML=txTable(cur==='in'?'in':'out');
+}
+sheet.addEventListener('click',function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute('data-del');if(!id)return;
+  twice(e.target,function(){S.tx=S.tx.filter(function(t){return t.id!==id;});save();render();});
+});
+document.querySelectorAll('[data-open]').forEach(function(b){b.addEventListener('click',function(){show(b.getAttribute('data-open'));});});
+
+/* Betalen */
+function openPay(){
+  var mult=1,custom='',kind='Wedstrijd';
+  var chips=[1,2,3,4,5,6].map(function(m){return '<button class="chip" data-m="'+m+'" aria-pressed="'+(m===1)+'">'+m+' krat'+(m>1?'en':'')+'</button>';}).join('');
+  open('<div class="hd"><h3>Betalingen</h3><button class="add" id="addb">Betaling toevoegen</button></div><div id="pf" hidden><p>Een krat is '+eur(KRAT)+'. Kies aantal kratten of voer een eigen bedrag in.</p>'+
+    '<div class="chips" id="chips">'+chips+'</div>'+
+    '<label for="cu">Of een vrij bedrag (€)</label><input id="cu" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00">'+
+    '<label for="dt">Datum</label><input id="dt" type="date" value="'+new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)+'">'+
+    '<label>Waarvoor?</label><div class="chips" id="kd"><button class="chip" data-k="Wedstrijd" aria-pressed="true">Wedstrijd</button><button class="chip" data-k="Training" aria-pressed="false">Training</button></div>'+
+    '<div id="opw"><label for="op">Tegen wie?</label><input id="op" type="text" placeholder="Bijv. HDM" autocomplete="off"></div>'+
+    '<div class="sum" id="sum"></div><button class="go" id="go">Betaal uit de pot</button></div><div id="pt">'+payTable()+'</div>');
+  document.getElementById('addb').addEventListener('click',function(){var f=document.getElementById('pf');f.hidden=!f.hidden;this.textContent=f.hidden?'Betaling toevoegen':'Annuleren';});
+  function amt(){return custom?num(custom):Math.round(mult*KRAT*100)/100;}
+  function upd(){
+    document.querySelectorAll('#chips .chip').forEach(function(c){c.setAttribute('aria-pressed',String(!custom&&+c.getAttribute('data-m')===mult));});
+    var a=amt();document.getElementById('sum').textContent=a?('Totaal: '+eur(a)+' · pot daarna '+eur(balance()-a)):'Voer een bedrag in';
+    document.getElementById('go').disabled=!a;
+  }
+  document.getElementById('chips').addEventListener('click',function(e){var m=e.target.getAttribute('data-m');if(!m)return;mult=+m;custom='';document.getElementById('cu').value='';upd();});
+  document.getElementById('cu').addEventListener('input',function(e){custom=e.target.value;upd();});
+  document.getElementById('go').addEventListener('click',function(){
+    var a=amt();if(!a)return;
+    var opp=document.getElementById('op').value.trim();
+    var what=kind==='Wedstrijd'?('Wedstrijd'+(opp?' tegen '+opp:'')):'Training';
+    var label=(custom?'Betaald':(mult+(mult>1?' kratten':' krat')))+' · '+what;
+    var d=document.getElementById('dt').value;
+    var ts=d?new Date(d+'T12:00:00').getTime():Date.now();
+    if(!isFinite(ts))ts=Date.now();
+    S.tx.push({id:uid(),type:'out',amount:a,label:label,ts:ts});
+    save();render();close();
+  });
+  document.getElementById('kd').addEventListener('click',function(e){
+    var k=e.target.getAttribute('data-k');if(!k)return;kind=k;
+    document.querySelectorAll('#kd .chip').forEach(function(c){c.setAttribute('aria-pressed',String(c.getAttribute('data-k')===kind));});
+    document.getElementById('opw').style.display=kind==='Wedstrijd'?'block':'none';
+  });
+  upd();
+}
+
+/* Inleg */
+function openIn(){
+  if(!S.players.length){
+    open('<h3>Inleg</h3><p>Voeg eerst teamgenoten toe om inleg te kunnen noteren.</p><button class="go" id="t">Teamgenoten toevoegen</button>');
+    document.getElementById('t').addEventListener('click',function(){show('team');});return;
+  }
+  var sel={},amount='';
+  var chips=S.players.map(function(p){return '<button class="chip" data-p="'+p.id+'" aria-pressed="false">'+(p.num!==''&&p.num!=null?'#'+esc(p.num)+' ':'')+esc(p.name)+'</button>';}).join('');
+  open('<div class="hd"><h3>Inleg</h3><button class="add" id="addb">Inleg toevoegen</button></div><div id="pf" hidden><p>Kies wie het Tikkie heeft betaald. Je kunt er meerdere tegelijk aanvinken.</p>'+
+    '<label for="am">Bedrag per persoon (€)</label><input id="am" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00">'+
+    '<div class="row" style="justify-content:space-between;margin-bottom:8px"><label style="margin:0;align-self:center">Wie heeft betaald?</label><button class="x" id="all" style="color:var(--sheet-soft)">Iedereen</button></div>'+
+    '<div class="chips" id="pc">'+chips+'</div><div class="sum" id="sum"></div>'+
+    '<button class="go" id="go">Inleg opslaan</button></div><div id="pt">'+inTable()+'</div>');
+  document.getElementById('addb').addEventListener('click',function(){var f=document.getElementById('pf');f.hidden=!f.hidden;this.textContent=f.hidden?'Inleg toevoegen':'Annuleren';});
+  function ids(){return Object.keys(sel).filter(function(k){return sel[k];});}
+  function upd(){
+    document.querySelectorAll('#pc .chip').forEach(function(c){c.setAttribute('aria-pressed',String(!!sel[c.getAttribute('data-p')]));});
+    var n=ids().length,a=num(amount);
+    document.getElementById('sum').textContent=(n&&a)?(n+' × '+eur(a)+' = '+eur(n*a)):'Kies een bedrag en minimaal één persoon';
+    document.getElementById('go').disabled=!(n&&a);
+  }
+  document.getElementById('am').addEventListener('input',function(e){amount=e.target.value;upd();});
+  document.getElementById('pc').addEventListener('click',function(e){var p=e.target.getAttribute('data-p');if(!p)return;sel[p]=!sel[p];upd();});
+  document.getElementById('all').addEventListener('click',function(){
+    var every=ids().length===S.players.length;S.players.forEach(function(p){sel[p.id]=!every;});upd();
+  });
+  document.getElementById('go').addEventListener('click',function(){
+    var a=num(amount),list=ids();if(!a||!list.length)return;
+    var now=Date.now();
+    list.forEach(function(id,i){
+      var p=S.players.filter(function(x){return x.id===id;})[0];
+      S.tx.push({id:uid(),type:'in',amount:a,pid:id,label:'Inleg '+p.name,ts:now+i});
+    });
+    save();render();close();
+  });
+  upd();
+}
+
+/* Teamgenoten */
+function behind(p){var o=S.players.filter(function(x){return x.id!==p.id;});if(!o.length)return 0;
+  var avg=o.reduce(function(a,x){return a+paid(x.id);},0)/o.length,d=avg-paid(p.id);return d>10?d:0;}
+function icon(p){var n=(p.num===''||p.num==null)?'':esc(p.num);
+  return '<svg viewBox="0 0 64 72" width="60" height="68" aria-hidden="true"><circle cx="32" cy="14" r="11" fill="currentColor"/><path d="M8 70V46q0-14 15-16h18q15 2 15 16v24z" fill="currentColor"/><text x="32" y="58" text-anchor="middle" font-size="'+(n.length>1?20:24)+'" font-weight="800" style="fill:var(--num,#fff)" font-family="system-ui,sans-serif">'+n+'</text></svg>';}
+function teamList(dash){
+  var ps=S.players.slice().sort(function(a,b){var x=(a.num===''||a.num==null)?1e9:+a.num,y=(b.num===''||b.num==null)?1e9:+b.num;return x-y||a.name.localeCompare(b.name,'nl');});
+  if(!ps.length)return '<p>'+(dash?'Nog geen teamgenoten. Tik op Teamgenoten om je team toe te voegen.':'Nog niemand toegevoegd.')+'</p>';
+  var g=ps.map(function(p){var late=behind(p)>0;
+    return '<div class="pl'+(late?' late':'')+'">'+(dash?'':'<button class="rm" data-rm="'+p.id+'" aria-label="'+esc(p.name)+' verwijderen">×</button>')+'<div class="ic">'+icon(p)+'</div><b>'+esc(p.name)+'</b><span>'+eur(paid(p.id))+(late?' ▼':'')+'</span></div>';}).join('');
+  var total=S.players.reduce(function(a,p){return a+paid(p.id);},0);
+  return '<div class="grid">'+g+'</div><p>Rood (▼): meer dan € 10 achter op het gemiddelde van de rest.</p><div class="tot"><span>Totale inleg</span><span>'+eur(total)+'</span></div>';
+}
+function openTeam(){
+  open('<h3>Teamgenoten</h3><p>Voeg je team toe met rugnummer. Je ziet wat iedereen heeft ingelegd.</p>'+
+    '<div class="row" style="margin-bottom:14px"><input id="nm" type="text" placeholder="Naam" autocomplete="off"><input id="nr" type="number" inputmode="numeric" min="0" max="99" placeholder="Nr" style="width:84px;flex:none"><button class="go" id="add">Voeg toe</button></div>'+
+    '<div id="ls">'+teamList()+'</div>');
+  function add(){
+    var i=document.getElementById('nm'),r=document.getElementById('nr'),n=i.value.trim();if(!n)return;
+    S.players.push({id:uid(),name:n,num:r.value.trim().slice(0,2)});save();
+    document.getElementById('ls').innerHTML=teamList();i.value='';r.value='';i.focus();
+  }
+  document.getElementById('add').addEventListener('click',add);
+  ['nm','nr'].forEach(function(id){document.getElementById(id).addEventListener('keydown',function(e){if(e.key==='Enter')add();});});
+  document.getElementById('ls').addEventListener('click',function(e){
+    var id=e.target.getAttribute('data-rm');if(!id)return;
+    var p=S.players.filter(function(x){return x.id===id;})[0];
+    twice(e.target,function(){
+      S.players=S.players.filter(function(x){return x.id!==id;});save();
+      document.getElementById('ls').innerHTML=teamList();
+    });
+  });
+}
+
+
+setTimeout(function(){var e=document.getElementById('st');if(e&&e.textContent==='Even laden...')st('Firebase laadt niet. Controleer je config en internet, en open de console (F12) voor de foutmelding.');},8000);
+render();show('team');
+</script>
+<script type="module">
+// 1) Plak hier de config uit Firebase (Projectinstellingen > Je apps > Web-app)
+const firebaseConfig = {
+  apiKey: "PLAK_HIER_JE_API_KEY",
+  authDomain: "JOUW-PROJECT.firebaseapp.com",
+  projectId: "JOUW-PROJECT",
+  appId: "PLAK_HIER_JE_APP_ID"
+};
+// 2) Wie mag inloggen (zet dezelfde adressen ook in de Firestore-regels)
+const TOEGESTAAN = ["lansvdstephan@gmail.com"];
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+let app, auth;
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+} catch (e) {
+  st("Firebase-config klopt niet: " + (e.code || e.message));
+  throw e;
+}
+const loginBtn = document.getElementById("login");
+let started = false, denied = "";
+
+loginBtn.addEventListener("click", () =>
+  signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => st("Inloggen mislukt: " + (e.code || e.message))));
+
+onAuthStateChanged(auth, (user) => {
+  const email = user && user.email ? user.email.toLowerCase() : "";
+  if (user && TOEGESTAAN.includes(email)) {
+    loginBtn.hidden = true;
+    document.body.classList.remove("locked");
+    if (!started) { started = true; start(); }
+  } else {
+    document.body.classList.add("locked");
+    loginBtn.hidden = false;
+    if (user) { denied = email; signOut(auth); }
+    st(denied ? denied + " heeft geen toegang" : "Log in met Google om de bierkas te openen");
+  }
+}, (e) => st("Inloggen niet beschikbaar: " + (e.code || e.message)));
+
+function start() {
+  const ref = doc(getFirestore(app), "bierkas", "state");
+  let first = true;
+  const t = setTimeout(() => st("Online opslag niet bereikbaar, gegevens staan op dit apparaat"), 10000);
+  onSnapshot(ref, (snap) => {
+    clearTimeout(t);
+    if (snap.exists()) {
+      const d = snap.data();
+      if (d && d.players && d.tx) {
+        window.S = { players: JSON.parse(JSON.stringify(d.players)), tx: JSON.parse(JSON.stringify(d.tx)) };
+        try { localStorage.setItem(KEY, JSON.stringify(window.S)); } catch (e) {}
+        render();
+        const ls = document.getElementById("ls");
+        if (ls) ls.innerHTML = teamList();
+      }
+    } else if (first && (S.players.length || S.tx.length)) {
+      setDoc(ref, { players: S.players, tx: S.tx }).catch(() => {});
+    }
+    window.DBREF = { set: (d) => setDoc(ref, d) };
+    first = false;
+    st("Online opgeslagen");
+  }, (e) => st("Online opslag geweigerd: " + (e.code || e.message)));
+}
+</script>
+</body>
+</html>
