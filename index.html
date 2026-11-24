@@ -91,7 +91,7 @@ body.locked .pot,body.locked .actions,body.locked #view{display:none}
   </div>
   <div class="sheet panel" id="view"></div>
   <div class="st" id="st">Even laden...</div>
-  <div style="text-align:center;margin-top:18px"><div id="login" hidden></div></div>
+  <div style="text-align:center;margin-top:18px"><button class="big" id="login" hidden style="padding:14px 24px">Inloggen met Google</button></div>
 </main>
 
 
@@ -282,7 +282,7 @@ const firebaseConfig = {
 const TOEGESTAAN = ["lansvdstephan@gmail.com", "damon170297@gmail.com", "mailboone@gmail.com"];
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithCredential, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let app, auth;
@@ -296,27 +296,17 @@ try {
 const loginBtn = document.getElementById("login");
 let started = false, denied = "";
 
-const CLIENT_ID = "739422178455-07ov85arv3vhgqakk58ding95gord193.apps.googleusercontent.com";
-let gsiReady = false, gsiRendered = false;
-function renderGoogleButton() {
-  if (gsiRendered || !gsiReady) return;
-  gsiRendered = true;
-  google.accounts.id.renderButton(loginBtn, { theme: "filled_blue", size: "large", shape: "pill", text: "signin_with", locale: "nl" });
-}
-const gs = document.createElement("script");
-gs.src = "https://accounts.google.com/gsi/client";
-gs.async = true;
-gs.onload = () => {
-  google.accounts.id.initialize({
-    client_id: CLIENT_ID,
-    callback: (r) => signInWithCredential(auth, GoogleAuthProvider.credential(r.credential))
-      .catch((e) => st("Inloggen mislukt: " + (e.code || e.message)))
+loginBtn.addEventListener("click", () => {
+  const provider = new GoogleAuthProvider();
+  signInWithPopup(auth, provider).catch((e) => {
+    if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
+      signInWithRedirect(auth, provider).catch((e2) => st("Inloggen mislukt: " + (e2.code || e2.message)));
+    } else if (e.code !== "auth/popup-closed-by-user" && e.code !== "auth/cancelled-popup-request") {
+      st("Inloggen mislukt: " + (e.code || e.message));
+    }
   });
-  gsiReady = true;
-  if (!loginBtn.hidden) renderGoogleButton();
-};
-gs.onerror = () => st("Google-inlog kon niet laden. Controleer je internet.");
-document.head.appendChild(gs);
+});
+getRedirectResult(auth).catch((e) => st("Inloggen mislukt: " + (e.code || e.message)));
 
 onAuthStateChanged(auth, (user) => {
   const email = user && user.email ? user.email.toLowerCase() : "";
@@ -327,7 +317,6 @@ onAuthStateChanged(auth, (user) => {
   } else {
     document.body.classList.add("locked");
     loginBtn.hidden = false;
-    renderGoogleButton();
     if (user) { denied = email; signOut(auth); }
     st(denied ? denied + " heeft geen toegang" : "Log in met Google om de bierkas te openen");
   }
